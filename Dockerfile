@@ -1,30 +1,30 @@
 # Stage 1: Build the application
 FROM node:18-alpine AS builder
 
-# The 'canvas' package requires system dependencies for drawing
+# Install system dependencies for the 'canvas' package
 RUN apk add --no-cache build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# Install all dependencies to run the build script
-RUN npm install
+# Install dependencies, but IGNORE scripts (like husky) that fail in a non-git environment
+RUN npm install --ignore-scripts
 
 COPY . .
 
-# Build the TypeScript code into JavaScript
+# Now, manually run the build script that was skipped
 RUN npm run build
 
-# Remove development-only packages for a smaller final image
+# Remove development-only packages
 RUN npm prune --production
 
 # ---
 
-# Stage 2: Create the final, lean production image
+# Stage 2: Create the final production image
 FROM node:18-alpine
 
-# Install only the runtime system dependencies needed for canvas
+# Install only the runtime system dependencies
 RUN apk add --no-cache cairo jpeg pango giflib
 
 WORKDIR /usr/src/app
