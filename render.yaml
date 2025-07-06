@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: mcp-server-chart-z0mf
+    env: docker
+    healthCheckPath: /mcp
+    healthCheckInitialDelaySeconds: 180
